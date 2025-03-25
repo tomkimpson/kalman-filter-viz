@@ -1,5 +1,6 @@
 import './App.css'
 import KalmanFilterVisualization from './components/KalmanFilterVisualization'
+import KalmanSimpleGaussian from './components/KalmanSimpleGaussian'
 
 function App() {
   return (
@@ -8,67 +9,75 @@ function App() {
         <h1 className="text-2xl font-bold">Understanding the Kalman Filter</h1>
       </header>
       
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left side: Explanatory text */}
-          <div className="lg:w-1/3 order-2 lg:order-1">
-            <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-              <h2 className="text-xl font-bold mb-4 text-blue-700">What is a Kalman Filter?</h2>
-              <p className="mb-4">
-                The Kalman filter is an algorithm that uses a series of measurements observed over time, 
-                containing noise and other inaccuracies, and produces estimates of unknown variables that 
-                tend to be more accurate than those based on a single measurement alone.
-              </p>
-              <p className="mb-4">
-                It operates recursively on streams of noisy input data to produce a statistically optimal 
-                estimate of the underlying system state.
-              </p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-              <h2 className="text-xl font-bold mb-4 text-blue-700">How It Works</h2>
-              <h3 className="font-semibold text-blue-600 mb-2">1. Prediction Step</h3>
-              <p className="mb-3 pl-4 border-l-2 border-blue-300">
-                The filter predicts the current state based on the previous state estimation and a mathematical model.
-                <br/><br/>
-                <strong>State Prediction:</strong> x̂ₖ⁻ = Fₖx̂ₖ₋₁ + Bₖuₖ
-                <br/>
-                <strong>Covariance Prediction:</strong> Pₖ⁻ = FₖPₖ₋₁Fₖᵀ + Qₖ
+      <div className="container mx-auto px-4 mb-8">
+        {/* Main visualization section */}
+        <KalmanFilterVisualization />
+        
+        {/* Gaussian diagram section */}
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4">Kalman Filter: The Bayesian Perspective</h2>
+          <KalmanSimpleGaussian />
+        </div>
+        
+        {/* Additional explanatory text */}
+        <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-bold mb-4">Key Concepts of the Kalman Filter</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-lg font-semibold text-blue-700 mb-2">How It Works</h3>
+              <p className="mb-3">
+                The Kalman filter is a recursive algorithm that estimates the state of a dynamic system from a series 
+                of noisy measurements. It works in two main steps:
               </p>
               
-              <h3 className="font-semibold text-blue-600 mb-2">2. Update Step</h3>
-              <p className="mb-3 pl-4 border-l-2 border-blue-300">
-                The filter updates the prediction based on current measurements to get a more accurate estimate.
-                <br/><br/>
-                <strong>Kalman Gain:</strong> Kₖ = Pₖ⁻Hₖᵀ(HₖPₖ⁻Hₖᵀ + Rₖ)⁻¹
-                <br/>
-                <strong>State Update:</strong> x̂ₖ = x̂ₖ⁻ + Kₖ(zₖ - Hₖx̂ₖ⁻)
-                <br/>
-                <strong>Covariance Update:</strong> Pₖ = (I - KₖHₖ)Pₖ⁻
-              </p>
+              <div className="pl-4 border-l-2 border-blue-200 mb-4">
+                <h4 className="font-medium">1. Prediction Step</h4>
+                <p className="text-sm">
+                  The filter predicts the current state based on the previous state using a system model.
+                  It also predicts how uncertain this estimate is.
+                </p>
+              </div>
+              
+              <div className="pl-4 border-l-2 border-blue-200">
+                <h4 className="font-medium">2. Update Step</h4>
+                <p className="text-sm">
+                  When a new measurement arrives, the filter compares it to the predicted state
+                  and updates the estimate. The Kalman gain determines how much to trust the prediction versus the measurement.
+                </p>
+              </div>
             </div>
             
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-bold mb-4 text-blue-700">Real World Applications</h2>
-              <ul className="list-disc pl-5">
-                <li>Navigation systems (GPS)</li>
-                <li>Robotic motion planning</li>
-                <li>Computer vision tracking</li>
-                <li>Spacecraft orientation</li>
-                <li>Economic forecasting</li>
-                <li>Autopilot systems</li>
+            <div>
+              <h3 className="text-lg font-semibold text-blue-700 mb-2">Applications</h3>
+              <p className="mb-3">
+                The Kalman filter is used in numerous fields where estimating states from noisy data is important:
+              </p>
+              
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Navigation systems (GPS, inertial navigation)</li>
+                <li>Robotics and autonomous vehicles</li>
+                <li>Aerospace (spacecraft orientation and tracking)</li>
+                <li>Economics and finance (forecasting)</li>
+                <li>Signal processing and control systems</li>
+                <li>Computer vision (object tracking)</li>
+                <li>Sensor fusion (combining data from multiple sensors)</li>
               </ul>
             </div>
           </div>
           
-          {/* Right side: Visualization */}
-          <div className="lg:w-2/3 order-1 lg:order-2">
-            <KalmanFilterVisualization />
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h3 className="text-lg font-semibold text-blue-700 mb-2">Mathematical Foundation</h3>
+            <p>
+              The Kalman filter is optimal for linear systems with Gaussian noise. It can be viewed as a Bayesian 
+              estimator where the prior (prediction) and likelihood (measurement) are both Gaussian distributions.
+              The posterior (updated estimate) is then also Gaussian with reduced uncertainty.
+            </p>
           </div>
         </div>
       </div>
       
-      <footer className="mt-12 p-4 bg-gray-100 text-center text-gray-600">
+      <footer className="p-4 bg-gray-100 text-center text-gray-600">
         <p>Kalman Filter Visualization • Created with React and Vite</p>
       </footer>
     </div>
