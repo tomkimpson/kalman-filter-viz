@@ -1,16 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import * as math from 'mathjs';
+import { MathJax, MathJaxContext } from 'better-react-mathjax';
+
+
+
+const config = {
+  loader: { load: ["input/tex", "output/svg"] },
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+  },
+};
+
+
+
+
 
 const KalmanFilterVisualization = () => {
   // State for Kalman filter parameters
   const [processNoise, setProcessNoise] = useState(0.05);
   const [measurementNoise, setMeasurementNoise] = useState(0.2);
-  const [showPrediction, setShowPrediction] = useState(true);
   const [showMeasurements, setShowMeasurements] = useState(true);
   const [showEstimate, setShowEstimate] = useState(true);
   const [showTruth, setShowTruth] = useState(true);
-  const [showAnimation, setShowAnimation] = useState(false);
+  const [showTrueAngle, setShowTrueAngle] = useState(true);
   const [data, setData] = useState([]);
   const [currentTimeStep, setCurrentTimeStep] = useState(0);
   const animationRef = useRef(null);
@@ -19,6 +33,8 @@ const KalmanFilterVisualization = () => {
   const g = 9.81;  // Gravitational acceleration (m/s^2)
   const dt = 0.01;  // Time step (s)
   const simulationEndTime = 5.0;  // Seconds
+
+
   // Generate pendulum data and apply Kalman filter
   useEffect(() => {
     // Helper for random number generation
@@ -33,11 +49,11 @@ const KalmanFilterVisualization = () => {
     const random2 = seedRandom(24);
     
     // Gaussian random number generator
-    const gaussian = (mean, stdDev, random) => {
+    const gaussian = (mean, σ, random) => {
       const u1 = random();
       const u2 = random();
       const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-      return z0 * stdDev + mean;
+      return z0 * σ + mean;
     };
     
     // Function to propagate the pendulum system
@@ -59,10 +75,10 @@ const KalmanFilterVisualization = () => {
     };
     
     // Function to generate noisy measurement (only horizontal component)
-    const generateMeasurement = (angle, measurementNoiseStdDev) => {
+    const generateMeasurement = (angle, σm) => {
       // Horizontal component: x = sin(angle)
       const trueX = Math.sin(angle);
-      return trueX + gaussian(0, measurementNoiseStdDev, random2);
+      return trueX + gaussian(0, σm, random2);
     };
     
     // Kalman filter implementation for pendulum system
@@ -139,7 +155,7 @@ const KalmanFilterVisualization = () => {
     
     let trueState = [initialAngle, initialAngularVelocity];
     let x_est = [initialAngle, initialAngularVelocity];  // Initial state estimate
-    let P_est = [[10.1, 0], [0, 10.1]];  // Initial error covariance
+    let P_est = [[10.0, 0], [0, 10.0]];  // Initial error covariance
     
     // Generate data points
     const newData = [];
@@ -152,17 +168,16 @@ const KalmanFilterVisualization = () => {
       const [trueAngle, trueAngularVelocity] = trueState;
       
       // Generate noisy measurement of horizontal position
-      const measuredX = generateMeasurement(trueAngle, Math.sqrt(measurementNoise));
+      const measurement_y = generateMeasurement(trueAngle, Math.sqrt(measurementNoise));
       
       // Apply Kalman filter
-      const {x_est: new_x_est, P_est: new_P_est, x_pred, P_pred} = kalmanFilter(measuredX, x_est, P_est);
+      const {x_est: new_x_est, P_est: new_P_est, x_pred, P_pred} = kalmanFilter(measurement_y, x_est, P_est);
       x_est = new_x_est;
       P_est = new_P_est;
       
       // Convert angle to horizontal position for visualization
       const trueX = Math.sin(trueAngle);
       const estimatedX = Math.sin(x_est[0]);
-      const predictedX = Math.sin(x_pred[0]);
       
       // Pendulum positions for animation
       const trueY = -Math.cos(trueAngle);
@@ -171,9 +186,8 @@ const KalmanFilterVisualization = () => {
       newData.push({
         time: t * dt,
         trueX,
-        measuredX,
+        measurement_y,
         estimatedX,
-        predictedX,
         trueAngle,
         estimatedAngle: x_est[0],
         trueY,
@@ -188,12 +202,13 @@ const KalmanFilterVisualization = () => {
 
   
   return (
+    <MathJaxContext config={config}>
     <div className="flex flex-col space-y-4 p-4 bg-gray-50 rounded-lg w-full">
-      <h2 className="text-xl font-bold text-center">Kalman Filter: Noisy Pendulum System</h2>    
+      <h2 className="text-xl font-bold text-left">Interactive example: the noisy pendulum</h2>    
       <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
         <div className="w-full md:w-3/4 bg-white p-4 rounded-lg shadow">
           <div className="mb-6">
-            <h3 className="text-lg font-bold mb-2">Angle (θ) vs. Time</h3>
+            {/* <h3 className="text-lg font-bold mb-2">Angle (θ) vs. Time</h3> */}
             <ResponsiveContainer width="100%" height={200}>
               <LineChart
                 data={data}
@@ -209,22 +224,26 @@ const KalmanFilterVisualization = () => {
                   domain={['dataMin', 'dataMax']}
                 />
                 <YAxis 
-                  label={{ value: 'Angle (rad)', angle: -90, position: 'left' }} 
-                  domain={[-10.1, 10.1]}
+                  label={{ 
+                    value: "θ", 
+                    angle: 0, 
+                    position: 'left',
+                  }}
+                  domain={[-2.1, 2.1]}
                   ticks={[-1, -0.5, 0, 0.5, 1]}
                   tickFormatter={(value) => value.toFixed(1)}
                   allowDataOverflow={true}
                 />
                 <Tooltip formatter={(value) => value.toFixed(3)} labelFormatter={(value) => `Time: ${value}s`} />
                 <Legend verticalAlign="top" />
-                {showTruth && <Line type="monotone" dataKey="trueAngle" stroke="#4CAF50" name="True Angle" dot={false} />}
+                {showTrueAngle && <Line type="monotone" dataKey="trueAngle" stroke="#4CAF50" name="True Angle" dot={false} />}
                 {showEstimate && <Line type="monotone" dataKey="estimatedAngle" stroke="#2196F3" name="Kalman Estimate" strokeWidth={2} dot={false} />}
               </LineChart>
             </ResponsiveContainer>
           </div>
 
           <div>
-            <h3 className="text-lg font-bold mb-2">Horizontal Position vs. Time</h3>
+            {/* <h3 className="text-lg font-bold mb-2">Horizontal Position vs. Time</h3> */}
             <ResponsiveContainer width="100%" height={200}>
               <LineChart
                 data={data}
@@ -238,16 +257,15 @@ const KalmanFilterVisualization = () => {
                   domain={['dataMin', 'dataMax']}
                 />
                 <YAxis 
-                  label={{ value: 'Position (m)', angle: -90, position: 'left' }} 
+                  label={{ value: 'z', angle: 0, position: 'left' }} 
                   domain={[-1, 1]}
                   ticks={[-1, -0.5, 0, 0.5, 1]}
                 />
                 <Tooltip formatter={(value) => value.toFixed(3)} labelFormatter={(value) => `Time: ${value}s`} />
                 <Legend verticalAlign="top" />
                 {showTruth && <Line type="monotone" dataKey="trueX" stroke="#4CAF50" name="True Position" dot={false} />}
-                {showMeasurements && <Line type="monotone" dataKey="measuredX" stroke="#F44336" name="Measurements" dot={{ r: 1 }} />}
-                {showEstimate && <Line type="monotone" dataKey="estimatedX" stroke="#2196F3" name="Kalman Estimate" strokeWidth={2} dot={false} />}
-                {showPrediction && <Line type="monotone" dataKey="predictedX" stroke="#9C27B0" name="Prediction" strokeDasharray="5 5" dot={false} />}
+                {showMeasurements && <Line type="monotone" dataKey="measurement_y" stroke="#F44336" name="Measurements" dot={{ r: 1 }} />}
+                {showEstimate && <Line type="monotone" dataKey="estimatedX" stroke="#2196F3" name="Kalman Estimates" strokeWidth={2} dot={false} />}
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -262,8 +280,8 @@ const KalmanFilterVisualization = () => {
               <input
                 type="range"
                 min="0.001"
-                max="10.9"
-                step="0.001"
+                max="5.0"
+                step="0.1"
                 value={processNoise}
                 onChange={(e) => setProcessNoise(parseFloat(e.target.value))}
                 className="w-full mt-1"
@@ -287,18 +305,17 @@ const KalmanFilterVisualization = () => {
             
             <div className="space-y-2 mt-6">
               <h4 className="font-medium">Display Options</h4>
-              
-              <div className="flex items-center">
+                            <div className="flex items-center">
                 <input
                   type="checkbox"
-                  id="showAnimation"
-                  checked={showAnimation}
-                  onChange={() => setShowAnimation(!showAnimation)}
+                  id="showTrueAngle"
+                  checked={showTrueAngle}
+                  onChange={() => setShowTrueAngle(!showTrueAngle)}
                   className="mr-2"
                 />
-                <label htmlFor="showAnimation" className="text-sm">Show Animation</label>
+                <label htmlFor="showTrueAngle" className="text-sm">True Angle</label>
               </div>
-              
+
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -331,75 +348,50 @@ const KalmanFilterVisualization = () => {
                 />
                 <label htmlFor="showEstimate" className="text-sm">Kalman Estimate</label>
               </div>
-              
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="showPrediction"
-                  checked={showPrediction}
-                  onChange={() => setShowPrediction(!showPrediction)}
-                  className="mr-2"
-                />
-                <label htmlFor="showPrediction" className="text-sm">Prediction</label>
-              </div>
             </div>
           </div>
         </div>
       </div>
       
       <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="font-bold mb-2">Pendulum System Model</h3>
+        <h3 className="font-bold mb-2 text-left"> Stochastic Pendulum Model</h3>
+        <p className="text-sm mt-1 text-left">
+        Lets demonstrate the application of the Kalman filter to a noisy pendulum system. This system is based on examples 3.7 and 5.1 in         <a href="https://www.cambridge.org/core/books/bayesian-filtering-and-smoothing/C372FB31C5D9A100F8476C1B23721A67" target="_blank" rel="noopener noreferrer">Bayesian Filtering and Smoothing</a>
+        by S. Särkkä.
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <h4 className="font-medium text-blue-600">Physical Model</h4>
+            <h4 className="font-medium text-blue-600 text-left">Dynamical Model</h4>
             <p className="text-sm mt-1">
+              To demo the filter we consider a pendulum system. The pendulum dynamics are described by:
               The pendulum dynamics are described by:
-              <br/><br/>
-              <span className="font-mono">d²θ/dt² = -g·sin(θ) + w(t)</span>
-              <br/><br/>
-              Where:
-              <br/>
-              - θ: angle from vertical
-              <br/>
-              - g: gravity (9.81 m/s²)
-              <br/>
-              - w(t): random process noise
+              <MathJax>{"\\[ \\frac{d^2\\theta}{dt^2} = -g\\sin(\\theta) + w(t) \\]"} </MathJax>
+              <span className="block text-left">where</span>
+              <MathJax>{"\\[ \\theta: \\text{ angle from vertical} \\]"}</MathJax>
+              <MathJax>{"\\[ g: \\text{ gravity } (9.81 \\text{ m/s}^2) \\]"}</MathJax>
+              <MathJax>{"\\[ w(t): \\text{ random (white) process noise} \\]"}</MathJax>
             </p>
           </div>
           <div>
             <h4 className="font-medium text-blue-600">Measurement Model</h4>
             <p className="text-sm mt-1">
-              We only observe the horizontal position:
-              <br/><br/>
-              <span className="font-mono">z = sin(θ) + v</span>
-              <br/><br/>
-              Where:
-              <br/>
-              - z: measured horizontal position
-              <br/>
-              - v: measurement noise
-              <br/><br/>
-              The Kalman filter must estimate both angle and angular velocity from these partial measurements.
+              Suppose we only observe the horizontal component of the pendulum:
+              <MathJax>{"\\[ z = \\sin(\\theta) + v(t) \\]"}</MathJax>
+              <span className="block text-left">where</span>
+              <MathJax>{"\\[ z: \\text{ measured horizontal position} \\]"}</MathJax>
+              <MathJax>{"\\[ v(t): \\text{ random (white) measurement noise} \\]"}</MathJax>
             </p>
           </div>
         </div>
         
         <div className="mt-4">
-          <h4 className="font-medium text-blue-600">State Space Formulation</h4>
-          <p className="text-sm mt-1">
-            We convert the second-order ODE to a system of first-order ODEs:
-            <br/><br/>
-            <span className="font-mono">x₁ = θ</span> (angle)
-            <br/>
-            <span className="font-mono">x₂ = dθ/dt</span> (angular velocity)
-            <br/><br/>
-            <span className="font-mono">dx₁/dt = x₂</span>
-            <br/>
-            <span className="font-mono">dx₂/dt = -g·sin(x₁) + w(t)</span>
+          <p className="text-sm mt-1 text-left">
+            Please see the <a href="https://github.com/UniMelb-NSGW/SlowKalmanFilter/blob/main/notebooks/NoisyPendulum.ipynb">Jupyter notebook</a> for the additional information and accompanying Python code.
           </p>
         </div>
       </div>
     </div>
+    </MathJaxContext>
   );
 };
 
