@@ -75,6 +75,11 @@ function App() {
                 </p>
               </div>
             </div>
+                    {/* Main visualization section with card styling */}
+          <div className="p-6">
+            <KalmanIteration />
+          </div>
+ 
 
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-blue-700">Applications</h3>
@@ -104,7 +109,14 @@ function App() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
                     </svg>
                   </div>
-                  <span className="text-gray-700">Robotics</span>
+                  <a 
+                    href="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=%22kalman+filter%22+%22robotics%22&btnG="
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-700 hover:text-blue-600 transition-colors"
+                  >
+                    Robotics
+                  </a>
                 </div>
                 <div className="bg-gray-50 p-3 rounded-lg flex items-center space-x-3">
                   <div className="bg-blue-100 rounded-full p-2 text-blue-600">
@@ -112,7 +124,14 @@ function App() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>
                   </div>
-                  <span className="text-gray-700">Aerospace</span>
+                  <a 
+                    href="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=%22kalman+filter%22+%22aerospace%22&btnG="
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-700 hover:text-blue-600 transition-colors"
+                  >
+                    Aerospace
+                  </a>
                 </div>
                 <div className="bg-gray-50 p-3 rounded-lg flex items-center space-x-3">
                   <div className="bg-blue-100 rounded-full p-2 text-blue-600">
@@ -120,7 +139,14 @@ function App() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                   </div>
-                  <span className="text-gray-700">Finance</span>
+                  <a 
+                    href="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=%22kalman+filter%22+%22finance%22&btnG="
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-700 hover:text-blue-600 transition-colors"
+                  >
+                    Finance
+                  </a>
                 </div>
                 <div className="bg-gray-50 p-3 rounded-lg flex items-center space-x-3">
                   <div className="bg-blue-100 rounded-full p-2 text-blue-600">
@@ -144,7 +170,14 @@ function App() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
                     </svg>
                   </div>
-                  <span className="text-gray-700">Signal Processing</span>
+                  <a 
+                    href="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=%22kalman+filter%22+%22signal+processing%22&btnG="
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-700 hover:text-blue-600 transition-colors"
+                  >
+                    Signal Processing
+                  </a>
                 </div>
               </div>
             </div>
@@ -160,12 +193,34 @@ function App() {
         </div>
 
 
-        {/* Main visualization section with card styling */}
+
+
+        {/* Final text section with card styling */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-10">
           <div className="p-6">
-            <KalmanIteration />
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-blue-700 text-left">Gaussianity and Optimality</h3>
+              <p className="text-gray-700 text-left">
+                The Kalman filter is the optimal estimator for linear systems. By "optimal" we mean that it minimises the mean-squared error between the estimated state and the true state,
+                <MathJax>{"\\[  f^*(Y) = \\arg\\min_f \\mathbb{E} \\left[(X - f(Y))^2 \\right] = \\mathbb{E}[X | Y] \\]"}</MathJax> cf. our previous statement that the Kalman filter calculates the posterior <MathJax inline>{"\\( p(\\mathbf{x}_k | \\mathbf{y}_{1:k})\\)"}</MathJax>.
+                <div className="my-1"></div>  {/* Add this line for extra spacing */}
+
+                Note that <a href="https://arxiv.org/abs/2405.00058v1" target="_blank" rel="noopener noreferrer">
+                Gaussianity is not required for MMSE optimality
+                </a>; Gaussianity matters only if you care about fully characterizing the posterior distribution (not just the mean). 
+                <div className="my-1"></div>  {/* Add this line for extra spacing */}
+
+                For non-linear systems, one must use variants of the Kalman filter such as the <a href="https://en.wikipedia.org/wiki/Extended_Kalman_filter" target="_blank" rel="noopener noreferrer">
+                Extened Kalman Filter
+                </a> (EKF) or the <a href="https://ieeexplore.ieee.org/document/882463" target="_blank" rel="noopener noreferrer">
+                Unscented Kalman Filter
+                </a> (UKF). These algorithms are not optimal in the above sense, but tend to work well in practice and are widely used. Indeed, the stochastic pendulum example above uses the EKF!
+
+              </p>
+            </div>
           </div>
         </div>
+
 
 
 
@@ -201,3 +256,10 @@ function App() {
 }
 
 export default App
+
+
+
+
+
+
+

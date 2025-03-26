@@ -276,13 +276,14 @@ const KalmanFilterVisualization = () => {
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Process Noise (Q)</label>
+              <label className="block text-sm font-medium text-gray-700">Process Noise, <MathJax inline>{"\\( \\sigma_{\\rm p}\\)"}</MathJax> </label>
               <input
                 type="range"
-                min="0.001"
-                max="5.0"
-                step="0.1"
+                min="0.0"
+                max="0.5"
+                step="0.05"
                 value={processNoise}
+                defaultValue={0.2} // Set default starting value to 0.05
                 onChange={(e) => setProcessNoise(parseFloat(e.target.value))}
                 className="w-full mt-1"
               />
@@ -290,13 +291,14 @@ const KalmanFilterVisualization = () => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700">Measurement Noise (R)</label>
+              <label className="block text-sm font-medium text-gray-700">Measurement Noise, <MathJax inline>{"\\( \\sigma_{\\rm m}\\)"}</MathJax> </label>
               <input
                 type="range"
-                min="0.001"
+                min="0.0"
                 max="0.5"
-                step="0.001"
+                step="0.05"
                 value={measurementNoise}
+                defaultValue={0.2} // Set default starting value to 0.2
                 onChange={(e) => setMeasurementNoise(parseFloat(e.target.value))}
                 className="w-full mt-1"
               />
@@ -356,30 +358,26 @@ const KalmanFilterVisualization = () => {
       <div className="bg-white p-4 rounded-lg shadow">
         <h3 className="font-bold mb-2 text-left"> Stochastic Pendulum Model</h3>
         <p className="text-sm mt-1 text-left">
-        Lets demonstrate the application of the Kalman filter to a noisy pendulum system. This system is based on examples 3.7 and 5.1 in         <a href="https://www.cambridge.org/core/books/bayesian-filtering-and-smoothing/C372FB31C5D9A100F8476C1B23721A67" target="_blank" rel="noopener noreferrer">Bayesian Filtering and Smoothing</a>
-        by S. Särkkä.
+        Consider applyingthe Kalman filter to a noisy pendulum system, cf. examples 3.7 and 5.1 in <a href="https://www.cambridge.org/core/books/bayesian-filtering-and-smoothing/C372FB31C5D9A100F8476C1B23721A67" target="_blank" rel="noopener noreferrer">Bayesian Filtering and Smoothing </a>
+         by S. Särkkä. We want to track the angle from the verticalof the pendulum <MathJax inline>{"\\( \\theta\\)"}</MathJax>, but we only have a noisy measurement of the horizontal position <MathJax inline>{"\\( z\\)"}</MathJax>.
         </p>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <h4 className="font-medium text-blue-600 text-left">Dynamical Model</h4>
             <p className="text-sm mt-1">
-              To demo the filter we consider a pendulum system. The pendulum dynamics are described by:
-              The pendulum dynamics are described by:
               <MathJax>{"\\[ \\frac{d^2\\theta}{dt^2} = -g\\sin(\\theta) + w(t) \\]"} </MathJax>
               <span className="block text-left">where</span>
-              <MathJax>{"\\[ \\theta: \\text{ angle from vertical} \\]"}</MathJax>
               <MathJax>{"\\[ g: \\text{ gravity } (9.81 \\text{ m/s}^2) \\]"}</MathJax>
-              <MathJax>{"\\[ w(t): \\text{ random (white) process noise} \\]"}</MathJax>
+              <MathJax>{"\\[ w(t): \\text{ random process noise} \\]"}</MathJax>
             </p>
           </div>
           <div>
             <h4 className="font-medium text-blue-600">Measurement Model</h4>
-            <p className="text-sm mt-1">
-              Suppose we only observe the horizontal component of the pendulum:
+            <p className="text-sm mt-1 text-left">
               <MathJax>{"\\[ z = \\sin(\\theta) + v(t) \\]"}</MathJax>
               <span className="block text-left">where</span>
-              <MathJax>{"\\[ z: \\text{ measured horizontal position} \\]"}</MathJax>
-              <MathJax>{"\\[ v(t): \\text{ random (white) measurement noise} \\]"}</MathJax>
+              <MathJax>{"\\[ v(t): \\text{ random measurement noise} \\]"}</MathJax>
             </p>
           </div>
         </div>

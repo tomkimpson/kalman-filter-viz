@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { MathJax, MathJaxContext } from 'better-react-mathjax';
+
+
+
+const config = {
+  loader: { load: ["input/tex", "output/svg"] },
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+  },
+};
 
 function KalmanIteration() {
   // State to track the current step in the Kalman filter process
@@ -7,11 +18,11 @@ function KalmanIteration() {
   
   // Define the steps in the Kalman filter process
   const steps = [
-    { id: 0, title: "Initial Prior Distribution", description: "Start with a prior probability distribution p(x₀)" },
-    { id: 1, title: "Prediction Step", description: "Predict what the next distribution is going to be, obtaining p(x₁|x₀)" },
-    { id: 2, title: "Measurement", description: "Take a measurement, obtaining measurement distribution p(y₁|x₁)" },
-    { id: 3, title: "Posterior Update", description: "Combine prediction and measurement to get a new posterior p(x₁|y₁)" },
-    { id: 4, title: "Cycle Completion", description: "The posterior becomes the new prior p(x₁) for the next iteration" }
+    { id: 0, title: "Initial Prior Distribution", description: <span>Start with a prior probability distribution <MathJax inline>{"\\(p(x_0)\\)"}</MathJax></span>},
+    { id: 1, title: "Prediction Step", description: <span>Predict what the next distribution is going to be, obtaining <MathJax inline>{"\\(p(x_1|x_0)\\)"}</MathJax></span>},
+    { id: 2, title: "Measurement", description: <span>Take a measurement, obtaining measurement distribution <MathJax inline>{"\\(p(y_1|x_1)\\)"}</MathJax></span>},
+    { id: 3, title: "Posterior Update", description: <span>Combine prediction and measurement to get a new posterior <MathJax inline>{"\\(p(x_1|y_1)\\)"}</MathJax></span>},
+    { id: 4, title: "Cycle Completion", description: <span>The posterior becomes the new prior <MathJax inline>{"\\(p(x_1)\\)"}</MathJax> for the next iteration</span> }
   ];
   
   // Generate x values for the plot
@@ -119,12 +130,11 @@ function KalmanIteration() {
   };
   
   return (
-    <div className="w-full max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h1 className="text-2xl font-bold mb-4 text-center">Kalman Filter Visualization</h1>
-      
+    <MathJaxContext config={config}>
+    <div className="w-full max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">      
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">{steps[currentStep].title}</h2>
-        <p className="text-gray-700">{steps[currentStep].description}</p>
+        <h2 className="text-xl font-semibold mb-2 text-left">{steps[currentStep].title}</h2>
+        <p className="text-gray-700 text-left">{steps[currentStep].description}</p>
       </div>
       
       <div className="relative mb-2" style={{ height: '32px' }}>
@@ -195,7 +205,7 @@ function KalmanIteration() {
               <Line 
                 type="monotone" 
                 dataKey="prior" 
-                name="Prior p(x₀)" 
+                name={<MathJax inline>{"\\(\\text{Prior }p(x_0)\\)"}</MathJax>}
                 stroke="#8884d8" 
                 dot={false} 
                 isAnimationActive={false}
@@ -205,7 +215,7 @@ function KalmanIteration() {
               <Line 
                 type="monotone" 
                 dataKey="predicted" 
-                name="Predicted p(x₁|x₀)" 
+                name={<MathJax inline>{"\\(\\text{Predicted }p(x_1|x_0)\\)"}</MathJax>}
                 stroke="#82ca9d" 
                 dot={false} 
                 isAnimationActive={false}
@@ -215,7 +225,7 @@ function KalmanIteration() {
               <Line 
                 type="monotone" 
                 dataKey="measurement" 
-                name="Measurement p(y₁|x₁)" 
+                name={<MathJax inline>{"\\(\\text{Measurement }p(y_1|x_1)\\)"}</MathJax>}
                 stroke="#ff7300" 
                 dot={false} 
                 isAnimationActive={false}
@@ -225,7 +235,7 @@ function KalmanIteration() {
               <Line 
                 type="monotone" 
                 dataKey="posterior" 
-                name="Posterior p(x₁|y₁)" 
+                name={<MathJax inline>{"\\(\\text{Posterior }p(x_1|y_1)\\)"}</MathJax>}
                 stroke="#ff0000" 
                 dot={false} 
                 isAnimationActive={false}
@@ -235,7 +245,7 @@ function KalmanIteration() {
               <Line 
                 type="monotone" 
                 dataKey="nextPrior" 
-                name="New Prior p(x₁)" 
+                name={<MathJax inline>{"\\(\\text{New Prior }p(x_1)\\)"}</MathJax>}
                 stroke="#8884d8" 
                 strokeDasharray="5 5"
                 dot={false} 
@@ -247,22 +257,20 @@ function KalmanIteration() {
       </div>
       
       <div className="text-gray-700 p-4 bg-gray-100 rounded">
-        <h3 className="font-semibold mb-2">The Bayesian Nature of Kalman Filtering:</h3>
-        <p className="mb-2">
+        <h3 className="font-semibold mb-2 text-left">The Bayesian Nature of Kalman Filtering:</h3>
+        <p className="mb-2 text-left">
           Kalman filtering is fundamentally a Bayesian process, where each step updates our belief about the state of the system:
         </p>
-        <ol className="list-decimal list-inside space-y-2">
-          <li>We start with a <span className="font-medium text-purple-700">prior distribution</span> p(x₀) representing our current belief about the state.</li>
-          <li>We use a <span className="font-medium text-green-700">prediction model</span> to forecast how the state will evolve, giving p(x₁|x₀).</li>
-          <li>We obtain <span className="font-medium text-orange-700">measurement data</span> p(y₁|x₁) with its own uncertainty.</li>
-          <li>We combine the prediction with the measurement to compute a <span className="font-medium text-red-700">posterior distribution</span> p(x₁|y₁).</li>
-          <li>The posterior becomes our <span className="font-medium text-purple-700">new prior</span> p(x₁) for the next iteration, completing the cycle.</li>
+        <ol className="list-decimal list-inside space-y-2 text-left">
+          <li>We start with a <span className="font-medium text-purple-700">prior distribution</span> <MathJax inline>{"\\( p(x_0) \\)"}</MathJax> representing our current belief about the state. </li>
+          <li>We use a <span className="font-medium text-green-700">prediction model</span> to forecast how the state will evolve, <MathJax inline>{"\\( p(x_1|x_0) \\)"}</MathJax>.</li>
+          <li>We obtain a <span className="font-medium text-orange-700">measurement</span> and calculate the likelihood <MathJax inline>{"\\( p(y_1|x_1) \\)"}</MathJax>. </li>
+          <li>We combine the prediction with the measurement to compute a <span className="font-medium text-red-700">posterior distribution</span> <MathJax inline>{"\\( p(x_1|y_1) \\)"}</MathJax>.</li>
+          <li>The posterior becomes our <span className="font-medium text-purple-700">new prior</span> <MathJax inline>{"\\( p(x_1) \\)"}</MathJax> for the next iteration, completing the cycle.</li>
         </ol>
-        <p className="mt-2">
-          This iterative cycle of predict-measure-update embodies the Bayesian approach of continuously refining our knowledge as new information becomes available. Each completed cycle improves our estimate based on all previous measurements.
-        </p>
       </div>
     </div>
+    </MathJaxContext>
   );
 }
 
